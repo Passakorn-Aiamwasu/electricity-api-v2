@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 const loadData = (file) => JSON.parse(fs.readFileSync(`./data/${file}`, 'utf8'));
 
 // 1. API: Total electricity usage for each year
-app.get('/api/usages/totalyear', (req, res) => {
+app.get('/api/usage/total-by-year', (req, res) => {
     const data = loadData('electricity_usages_en.json');
     const totals = data.reduce((acc, curr) => {
         const year = curr.year;
@@ -30,7 +30,15 @@ app.get('/api/users/total-by-year', (req, res) => {
     res.json(totals);
 });
 
-// 3. API: Usage by province and year
+// 5. API: Usage history (ต้องมาก่อน)
+app.get('/api/usage/history/:province', (req, res) => {
+    const { province } = req.params;
+    const data = loadData('electricity_usages_en.json');
+    const result = data.filter(d => d.province_name.toLowerCase() === province.toLowerCase());
+    res.json(result);
+});
+
+// 3. API: Usage by province and year (ไว้หลัง)
 app.get('/api/usage/:province/:year', (req, res) => {
     const { province, year } = req.params;
     const data = loadData('electricity_usages_en.json');
@@ -38,28 +46,20 @@ app.get('/api/usage/:province/:year', (req, res) => {
     res.json(result || { message: "Data not found" });
 });
 
-// 4. API: Users by province and year
+// 6. history ก่อน
+app.get('/api/users/history/:province', (req, res) => {
+    const { province } = req.params;
+    const data = loadData('electricity_users_en.json');
+    const result = data.filter(d => d.province_name.toLowerCase() === province.toLowerCase());
+    res.json(result);
+});
+
+// 4. ค่อย specific ทีหลัง
 app.get('/api/users/:province/:year', (req, res) => {
     const { province, year } = req.params;
     const data = loadData('electricity_users_en.json');
     const result = data.find(d => d.province_name.toLowerCase() === province.toLowerCase() && d.year == year);
     res.json(result || { message: "Data not found" });
-});
-
-// 5. API: Usage history for a specific province
-app.get('/api/usage-history/history/:province', (req, res) => {
-    const { province } = req.params;
-    const data = loadData('electricity_usages_en.json');
-    const result = data.filter(d => d.province_name.toLowerCase() === province.toLowerCase());
-    res.json(result);
-});
-
-// 6. API: User history for a specific province
-app.get('/api/pastusers/:province', (req, res) => {
-    const { province } = req.params;
-    const data = loadData('electricity_users_en.json');
-    const result = data.filter(d => d.province_name.toLowerCase() === province.toLowerCase());
-    res.json(result);
 });
 
 if (process.env.NODE_ENV !== 'test') {
