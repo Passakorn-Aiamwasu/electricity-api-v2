@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 const loadData = (file) => JSON.parse(fs.readFileSync(`./data/${file}`, 'utf8'));
 
 // 1. API: Total electricity usage for each year
-app.get('/api/usage/total-by-year', (req, res) => {
+app.get('/api/usages/totalyear', (req, res) => {
     const data = loadData('electricity_usages_en.json');
     const totals = data.reduce((acc, curr) => {
         const year = curr.year;
@@ -55,11 +55,15 @@ app.get('/api/usage-history/history/:province', (req, res) => {
 });
 
 // 6. API: User history for a specific province
-app.get('/api/users-history/history/:province', (req, res) => {
+app.get('/api/pastusers/:province', (req, res) => {
     const { province } = req.params;
     const data = loadData('electricity_users_en.json');
     const result = data.filter(d => d.province_name.toLowerCase() === province.toLowerCase());
     res.json(result);
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => console.log(`Server running on port${PORT}`));
+}
+
+module.exports = app; // Export for testing
